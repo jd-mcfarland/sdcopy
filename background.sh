@@ -1,4 +1,4 @@
-#!/bin/bash
+a#!/bin/bash
 
 # Assign passed arguments to variables
 MOUNT_POINT="$1"
@@ -23,7 +23,7 @@ if [ -z "$SDCARD_MOUNT_POINT" ]; then
     echo 'SD card not mounted, aborting copy' >> "$LOG_FILE"
     SUBJECT="Copy Job Failed"
     BODY="Copy job failed - SD card not mounted"
-    echo -e "Subject: $SUBJECT\r\n\r\n$BODY" | msmtp parabellum2000+sdcopy@gmail.com
+    echo -e "Subject: $SUBJECT\r\n\r\n$BODY" | msmtp example+sdcopy@example.com
     exit 1
 fi
 
@@ -33,7 +33,7 @@ SDCARD_NAME=${SDCARD_NAME// /_}  # Replace spaces with underscores
 
 # Create a unique subdirectory for each copy job using the SD card name, date, and time in 12-hour format (without seconds)
 TIMESTAMP=$(date +"%Y%m%d_%I%M_%p") # 12-hour format with AM/PM, without seconds
-DESTINATION="/mnt/7c2456dd-dbd7-4c0a-ac11-192eb0c1f2af/nas_backup/PhotoLandingZone/${SDCARD_NAME}_$TIMESTAMP"
+DESTINATION="/[YOURDESINTATIONPATH]/${SDCARD_NAME}_$TIMESTAMP"
 mkdir -p "$DESTINATION"
 
 # File for Rsync job summary
@@ -54,7 +54,7 @@ echo 'Rsync job completed' >> "$LOG_FILE"
 # Email notification for success
 SUBJECT="Copy Job Completed"
 BODY="Copy job to $DESTINATION completed successfully"
-echo -e "Subject: $SUBJECT\r\n\r\n$BODY" | msmtp parabellum2000+sdcopy@gmail.com
+echo -e "Subject: $SUBJECT\r\n\r\n$BODY" | msmtp example+sdcopy@example.com
 
 # Safely unmount the specific SD card mount point
 echo "Unmounting $SDCARD_MOUNT_POINT..." >> "$LOG_FILE"
