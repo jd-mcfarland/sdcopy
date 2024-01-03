@@ -3,7 +3,7 @@ Description=Copy files from SD card
 
 [Service]
 Type=simple
-ExecStart=/home/nas/Documents/background_copy_sd.sh /media/nas /home/nas/Documents/copysdlogs/copysdlogs.log
+ExecStart=[PATH TO SCRIPT]/background_copy_sd.sh [PATH TO LOGS]/copysdlogs.log
 
 [Install]
 WantedBy=multi-user.target
