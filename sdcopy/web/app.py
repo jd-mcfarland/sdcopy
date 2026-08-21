@@ -83,6 +83,10 @@ def _ctx(request: Request, **extra):
     }
 
 
+def render(request: Request, name: str, **extra):
+    return templates.TemplateResponse(request, name, _ctx(request, **extra))
+
+
 def _device_rows():
     cards = {card.uuid: card for card in load_cards()}
     rows = []
@@ -94,9 +98,11 @@ def _device_rows():
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request):
-    return templates.TemplateResponse(
+    return render(
+        request,
         "dashboard.html",
-        _ctx(request, devices=_device_rows(), jobs=list_jobs(limit=20)),
+        devices=_device_rows(),
+        jobs=list_jobs(limit=20),
     )
 
 
@@ -125,7 +131,7 @@ async def api_status():
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_form(request: Request):
-    return templates.TemplateResponse("login.html", _ctx(request))
+    return render(request, "login.html")
 
 
 @app.post("/login")
@@ -149,15 +155,13 @@ async def onboard_form(request: Request, device: str = "", uuid: str = ""):
                 break
     existing = get_card(facts.uuid) if facts and facts.uuid else None
     config = load_config()
-    return templates.TemplateResponse(
+    return render(
+        request,
         "onboard.html",
-        _ctx(
-            request,
-            facts=facts,
-            existing=existing,
-            config=config,
-            unknown_devices=[row for row in _device_rows() if row["card"] is None],
-        ),
+        facts=facts,
+        existing=existing,
+        config=config,
+        unknown_devices=[row for row in _device_rows() if row["card"] is None],
     )
 
 
@@ -222,7 +226,7 @@ async def onboard_submit(
 
 @app.get("/cards", response_class=HTMLResponse)
 async def cards_page(request: Request):
-    return templates.TemplateResponse("cards.html", _ctx(request, cards=load_cards()))
+    return render(request, "cards.html", cards=load_cards())
 
 
 @app.get("/cards/{uuid}", response_class=HTMLResponse)
@@ -231,7 +235,7 @@ async def card_edit(request: Request, uuid: str):
     if card is None:
         _flash(request, "That card is not in the registry.", "error")
         return RedirectResponse("/cards", status_code=303)
-    return templates.TemplateResponse("card_edit.html", _ctx(request, card=card, config=load_config()))
+    return render(request, "card_edit.html", card=card, config=load_config())
 
 
 @app.post("/cards/{uuid}")
@@ -297,12 +301,12 @@ async def job_detail(request: Request, job_id: str):
     summary = ""
     if job.summary_path and Path(job.summary_path).is_file():
         summary = Path(job.summary_path).read_text(encoding="utf-8", errors="replace")[-8000:]
-    return templates.TemplateResponse("job.html", _ctx(request, job=job, summary=summary))
+    return render(request, "job.html", job=job, summary=summary)
 
 
 @app.get("/settings", response_class=HTMLResponse)
 async def settings_form(request: Request):
-    return templates.TemplateResponse("settings.html", _ctx(request, config=load_config()))
+    return render(request, "settings.html", config=load_config())
 
 
 @app.post("/settings")
@@ -331,20 +335,21 @@ async def settings_save(
     config = load_config()
     dest = destination_root.strip()
     if dest:
-        allowed, reason = destination_allowed(config, dest)
-        # First-time destination becomes the allowed root.
-        if not allowed and not config.destination_root and not config.allowed_roots:
-            allowed, reason = True, ""
-        if dest and not allowed:
-            _flash(request, reason, "error")
+        dest_path = Path(dest).expanduser()
+        if not dest_path.is_absolute():
+            _flash(request, "destination must be an absolute path", "error")
             return RedirectResponse("/settings", status_code=303)
-        if dest and require_destination_mount == "on":
+        if not dest_path.exists() or not dest_path.is_dir():
+            _flash(request, f"destination does not exist: {dest_path}", "error")
+            return RedirectResponse("/settings", status_code=303)
+        if require_destination_mount == "on":
             from sdcopy.device import destination_mount_ok
 
-            ok, mount_reason = destination_mount_ok(dest, require_mount=True)
+            ok, mount_reason = destination_mount_ok(str(dest_path), require_mount=True)
             if not ok:
                 _flash(request, mount_reason, "error")
                 return RedirectResponse("/settings", status_code=303)
+        dest = str(dest_path)
     if unknown_card_policy not in {UNKNOWN_HOLD, UNKNOWN_COPY}:
         unknown_card_policy = UNKNOWN_HOLD
     if not listen_is_loopback(listen_host.strip()) and not listen_token.strip() and not config.listen.token:
