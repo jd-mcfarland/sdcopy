@@ -15,6 +15,8 @@ sudo -E apt-get install -y --no-install-recommends \
   shellcheck
 
 echo "sdcopy environment ready:"
-rsync --version | head -1
-msmtp --version | head -1
-shellcheck --version | grep -i version | head -1
+# Report versions without piping into `head` so an early pipe close cannot
+# raise SIGPIPE (exit 141) under `set -o pipefail`.
+echo "  rsync:      $(rsync --version | sed -n '1p')"
+echo "  msmtp:      $(msmtp --version | sed -n '1p')"
+echo "  shellcheck: $(shellcheck --version | sed -n '2p')"
