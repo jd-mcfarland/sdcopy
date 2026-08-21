@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Unlock · sdcopy{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Unlock</h1>
+  <p>This UI is bound beyond localhost, so a token is required.</p>
+</section>
+<form method="post" action="/login" class="stack">
+  <label>Token
+    <input type="password" name="token" required>
+  </label>
+  <button type="submit">Continue</button>
+</form>
+{% endblock %}

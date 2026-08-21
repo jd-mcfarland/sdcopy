@@ -1,0 +1,11 @@
+# Trigger sdcopy ingest for USB and MMC partitions with camera-style filesystems.
+# Pin ATTRS{idVendor}/ATTRS{idProduct} to a specific card reader if this machine
+# also has other USB disks that should never be ingested.
+
+ACTION=="add", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", \
+  ENV{ID_BUS}=="usb", ENV{ID_FS_TYPE}=="vfat|exfat|ntfs", \
+  TAG+="systemd", ENV{SYSTEMD_WANTS}+="sdcopy@%k.service"
+
+ACTION=="add", SUBSYSTEM=="block", KERNEL=="mmcblk[0-9]p[0-9]", \
+  ENV{ID_FS_TYPE}=="vfat|exfat|ntfs", \
+  TAG+="systemd", ENV{SYSTEMD_WANTS}+="sdcopy@%k.service"

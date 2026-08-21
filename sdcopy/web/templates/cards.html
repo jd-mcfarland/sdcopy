@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Cards · sdcopy{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Onboarded cards</h1>
+  <p>Only enabled cards auto-copy. Forgetting a card does not delete folders already ingested.</p>
+  <p><a class="btn" href="/onboard">Onboard a card that is inserted now</a></p>
+</section>
+
+{% if cards %}
+<table>
+  <thead>
+    <tr>
+      <th>Nickname</th>
+      <th>UUID</th>
+      <th>Status</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for card in cards %}
+    <tr>
+      <td>
+        <strong>{{ card.nickname }}</strong>
+        {% if card.label %}<div class="muted">{{ card.label }}</div>{% endif %}
+      </td>
+      <td class="mono">{{ card.uuid }}</td>
+      <td>{% if card.enabled %}enabled{% else %}disabled{% endif %}</td>
+      <td class="actions">
+        <a class="btn ghost" href="/cards/{{ card.uuid }}">Edit</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">No cards yet. Insert a card and onboard it from the dashboard.</p>
+{% endif %}
+{% endblock %}

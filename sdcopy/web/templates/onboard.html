@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Onboard card · sdcopy{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Onboard a card</h1>
+  <p>Name this card so future inserts copy automatically. Reformatting changes the UUID and requires onboarding again.</p>
+</section>
+
+{% if not facts %}
+  {% if unknown_devices %}
+  <p>Select an inserted card:</p>
+  <ul class="plain">
+    {% for row in unknown_devices %}
+    <li>
+      <a href="/onboard?device={{ row.facts.kernel }}">
+        {{ row.facts.label or row.facts.kernel }} · {{ row.facts.size or "size unknown" }} · {{ row.facts.uuid or "no uuid" }}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">No unknown cards are inserted right now. Plug one in and refresh.</p>
+  {% endif %}
+{% else %}
+  <dl class="facts">
+    <div><dt>Device</dt><dd class="mono">{{ facts.kernel }}</dd></div>
+    <div><dt>UUID</dt><dd class="mono">{{ facts.uuid or "missing — cannot onboard" }}</dd></div>
+    <div><dt>Label</dt><dd>{{ facts.label or "—" }}</dd></div>
+    <div><dt>Filesystem</dt><dd>{{ facts.fstype or "—" }}</dd></div>
+    <div><dt>Size</dt><dd>{{ facts.size or "—" }}</dd></div>
+    <div><dt>Mounted</dt><dd class="mono">{{ facts.mountpoint or "no" }}</dd></div>
+  </dl>
+
+  {% if facts.uuid %}
+  <form method="post" action="/onboard" class="stack">
+    <input type="hidden" name="uuid" value="{{ facts.uuid }}">
+    <input type="hidden" name="device" value="{{ facts.kernel }}">
+    <input type="hidden" name="label" value="{{ facts.label or '' }}">
+
+    <label>Nickname
+      <input type="text" name="nickname" required value="{{ existing.nickname if existing else (facts.label or '') }}" placeholder="Sony A7 main">
+    </label>
+    <label>Destination override
+      <input type="text" name="destination_root" value="{{ existing.destination_root if existing and existing.destination_root else '' }}" placeholder="Leave blank to use the global landing zone">
+    </label>
+    <label>Naming template
+      <input type="text" name="naming_template" value="{{ existing.naming_template if existing and existing.naming_template else '' }}" placeholder="{nickname}_{date}_{time}">
+    </label>
+    <label>Source
+      <select name="source_mode">
+        <option value="">Use global default</option>
+        <option value="entire_card" {% if existing and existing.source_mode == 'entire_card' %}selected{% endif %}>Entire card</option>
+        <option value="dcim_only" {% if existing and existing.source_mode == 'dcim_only' %}selected{% endif %}>DCIM folder only</option>
+      </select>
+    </label>
+    <label>Auto-unmount
+      <select name="auto_unmount">
+        <option value="default" {% if not existing or existing.auto_unmount is none %}selected{% endif %}>Use global default</option>
+        <option value="yes" {% if existing and existing.auto_unmount is sameas true %}selected{% endif %}>Yes, unmount when safe</option>
+        <option value="no" {% if existing and existing.auto_unmount is sameas false %}selected{% endif %}>No, leave mounted</option>
+      </select>
+    </label>
+    <label>Notes
+      <textarea name="notes" rows="3">{{ existing.notes if existing else '' }}</textarea>
+    </label>
+    <div class="actions">
+      <button type="submit" name="action" value="save">Save</button>
+      <button type="submit" name="action" value="copy">Save and copy now</button>
+      <button type="submit" class="ghost" name="action" value="dry_run">Save and dry run</button>
+    </div>
+  </form>
+  {% endif %}
+{% endif %}
+{% endblock %}

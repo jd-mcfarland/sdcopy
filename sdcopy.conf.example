@@ -1,0 +1,26 @@
+{
+  "destination_root": "/mnt/photos/PhotoLandingZone",
+  "require_destination_mount": true,
+  "naming_template": "{nickname}_{date}_{time}",
+  "unknown_card_policy": "hold",
+  "auto_unmount": true,
+  "verify_checksum": true,
+  "source_mode": "entire_card",
+  "owner": "nas",
+  "group": "sdcopy",
+  "dir_mode": "2775",
+  "file_mode": "0664",
+  "email": {
+    "enabled": true,
+    "to": "",
+    "msmtp_account": "default"
+  },
+  "listen": {
+    "host": "127.0.0.1",
+    "port": 8743,
+    "token": ""
+  },
+  "mount_wait_seconds": 60,
+  "log_dir": "/var/log/sdcopy",
+  "allowed_roots": []
+}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Settings · sdcopy{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Settings</h1>
+  <p>These apply to every card unless a card overrides them. Unknown cards stay held until onboarded unless you change that policy.</p>
+</section>
+
+<form method="post" action="/settings" class="stack">
+  <h2>Landing zone</h2>
+  <label>Destination root
+    <input type="text" name="destination_root" value="{{ config.destination_root }}" placeholder="/mnt/photos/PhotoLandingZone" required>
+  </label>
+  <label>Naming template
+    <input type="text" name="naming_template" value="{{ config.naming_template }}">
+    <span class="hint">Tokens: {nickname} {label} {uuid} {date} {time}</span>
+  </label>
+  <label>Unknown card policy
+    <select name="unknown_card_policy">
+      <option value="hold" {% if config.unknown_card_policy == 'hold' %}selected{% endif %}>Hold for onboarding (recommended)</option>
+      <option value="copy" {% if config.unknown_card_policy == 'copy' %}selected{% endif %}>Copy unknown cards using the volume label</option>
+    </select>
+  </label>
+  <label>Source
+    <select name="source_mode">
+      <option value="entire_card" {% if config.source_mode == 'entire_card' %}selected{% endif %}>Entire card</option>
+      <option value="dcim_only" {% if config.source_mode == 'dcim_only' %}selected{% endif %}>DCIM folder only</option>
+    </select>
+  </label>
+  <label class="check"><input type="checkbox" name="require_destination_mount" {% if config.require_destination_mount %}checked{% endif %}> Refuse to copy unless the destination is on a mounted volume (not the OS disk)</label>
+  <label class="check"><input type="checkbox" name="auto_unmount" {% if config.auto_unmount %}checked{% endif %}> Unmount after a verified copy</label>
+  <label class="check"><input type="checkbox" name="verify_checksum" {% if config.verify_checksum %}checked{% endif %}> Checksum verify after rsync (slower, safer for photos)</label>
+  <label>Mount wait (seconds)
+    <input type="number" name="mount_wait_seconds" min="1" max="600" value="{{ config.mount_wait_seconds }}">
+  </label>
+
+  <h2>Ownership</h2>
+  <label>Owner <input type="text" name="owner" value="{{ config.owner }}"></label>
+  <label>Group <input type="text" name="group" value="{{ config.group }}"></label>
+  <label>Directory mode <input type="text" name="dir_mode" value="{{ config.dir_mode }}"></label>
+  <label>File mode <input type="text" name="file_mode" value="{{ config.file_mode }}"></label>
+  <label>Log directory <input type="text" name="log_dir" value="{{ config.log_dir }}"></label>
+
+  <h2>Email</h2>
+  <label class="check"><input type="checkbox" name="email_enabled" {% if config.email.enabled %}checked{% endif %}> Send msmtp notifications</label>
+  <label>To <input type="email" name="email_to" value="{{ config.email.to }}"></label>
+  <label>msmtp account <input type="text" name="msmtp_account" value="{{ config.email.msmtp_account }}"></label>
+
+  <h2>UI listen</h2>
+  <label>Host <input type="text" name="listen_host" value="{{ config.listen.host }}"></label>
+  <label>Port <input type="number" name="listen_port" value="{{ config.listen.port }}"></label>
+  <label>Token (required to bind beyond localhost)
+    <input type="text" name="listen_token" value="" placeholder="Leave blank to keep the current token">
+  </label>
+
+  <div class="actions">
+    <button type="submit">Save settings</button>
+  </div>
+</form>
+{% endblock %}

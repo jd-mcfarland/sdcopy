@@ -1,1 +1,0 @@
-ACTION=="add", KERNEL=="sd[a-z][0-9]", SUBSYSTEM=="block", TAG+="systemd", ENV{SYSTEMD_WANTS}+="sdcard-copy.service"
