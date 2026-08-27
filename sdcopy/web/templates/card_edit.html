@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Edit {{ card.nickname }} · sdcopy{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>{{ card.nickname }}</h1>
+  <p class="mono">{{ card.uuid }}</p>
+</section>
+
+<form method="post" action="/cards/{{ card.uuid }}" class="stack">
+  <label>Nickname
+    <input type="text" name="nickname" required value="{{ card.nickname }}">
+  </label>
+  <label class="check">
+    <input type="checkbox" name="enabled" {% if card.enabled %}checked{% endif %}> Enabled (auto-copy on insert)
+  </label>
+  <label>Destination override
+    <input type="text" name="destination_root" value="{{ card.destination_root or '' }}">
+  </label>
+  <label>Naming template
+    <input type="text" name="naming_template" value="{{ card.naming_template or '' }}" placeholder="{{ config.naming_template }}">
+  </label>
+  <label>Source
+    <select name="source_mode">
+      <option value="">Use global default</option>
+      <option value="entire_card" {% if card.source_mode == 'entire_card' %}selected{% endif %}>Entire card</option>
+      <option value="dcim_only" {% if card.source_mode == 'dcim_only' %}selected{% endif %}>DCIM folder only</option>
+    </select>
+  </label>
+  <label>Auto-unmount
+    <select name="auto_unmount">
+      <option value="default" {% if card.auto_unmount is none %}selected{% endif %}>Use global default</option>
+      <option value="yes" {% if card.auto_unmount is sameas true %}selected{% endif %}>Yes</option>
+      <option value="no" {% if card.auto_unmount is sameas false %}selected{% endif %}>No</option>
+    </select>
+  </label>
+  <label>Notes
+    <textarea name="notes" rows="3">{{ card.notes }}</textarea>
+  </label>
+  <div class="actions">
+    <button type="submit">Save</button>
+    <a class="btn ghost" href="/cards">Cancel</a>
+  </div>
+</form>
+
+<form method="post" action="/cards/{{ card.uuid }}/delete" class="danger-form" onsubmit="return confirm('Forget this card? Existing copies stay on disk.');">
+  <button type="submit" class="danger">Forget card</button>
+</form>
+{% endblock %}

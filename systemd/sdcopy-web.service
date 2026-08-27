@@ -1,0 +1,15 @@
+[Unit]
+Description=sdcopy local setup UI
+After=network.target
+
+[Service]
+User=@@USER@@
+Group=@@GROUP@@
+WorkingDirectory=@@STATE@@
+Environment=SDCOPY_STATE_DIR=@@STATE@@
+Environment=SDCOPY_ETC_CONFIG=@@ETC@@/config.json
+ExecStart=@@VENV@@/bin/sdcopy web
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

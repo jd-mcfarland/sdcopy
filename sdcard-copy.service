@@ -1,9 +1,0 @@
-[Unit]
-Description=Copy files from SD card
-
-[Service]
-Type=simple
-ExecStart=[PATH TO SCRIPT]/background_copy_sd.sh [PATH TO LOGS]/copysdlogs.log
-
-[Install]
-WantedBy=multi-user.target

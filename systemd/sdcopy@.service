@@ -1,0 +1,15 @@
+[Unit]
+Description=Ingest removable volume %i
+BindsTo=dev-%i.device
+After=dev-%i.device
+
+[Service]
+Type=oneshot
+TimeoutStartSec=infinity
+Nice=10
+IOSchedulingClass=idle
+User=@@USER@@
+Group=@@GROUP@@
+Environment=SDCOPY_STATE_DIR=@@STATE@@
+Environment=SDCOPY_ETC_CONFIG=@@ETC@@/config.json
+ExecStart=@@VENV@@/bin/python -m sdcopy.ingest %i

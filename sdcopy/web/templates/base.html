@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}sdcopy{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="top">
+    <a class="mark" href="/">sdcopy</a>
+    <nav>
+      <a href="/">Dashboard</a>
+      <a href="/cards">Cards</a>
+      <a href="/settings">Settings</a>
+    </nav>
+  </header>
+  <main>
+    {% if flash %}
+    <p class="flash flash-{{ flash.kind }}">{{ flash.message }}</p>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer>
+    <span>Local ingest UI v{{ version }}</span>
+    <span>Headless photography landing zone</span>
+  </footer>
+</body>
+</html>

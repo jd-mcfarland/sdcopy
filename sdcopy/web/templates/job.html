@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Job {{ job.id }} · sdcopy{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>{{ job.nickname or job.uuid or job.device }}</h1>
+  <p><span class="pill pill-{{ job.status }}">{{ job.status.replace('_', ' ') }}</span></p>
+</section>
+
+<dl class="facts">
+  <div><dt>Job</dt><dd class="mono">{{ job.id }}</dd></div>
+  <div><dt>Device</dt><dd class="mono">{{ job.device }}</dd></div>
+  <div><dt>UUID</dt><dd class="mono">{{ job.uuid or "—" }}</dd></div>
+  <div><dt>Started</dt><dd>{{ job.started_at }}</dd></div>
+  <div><dt>Finished</dt><dd>{{ job.finished_at or "—" }}</dd></div>
+  <div><dt>Source</dt><dd class="mono">{{ job.src or "—" }}</dd></div>
+  <div><dt>Destination</dt><dd class="mono">{{ job.dest or "—" }}</dd></div>
+  <div><dt>Files</dt><dd>{{ job.file_count if job.file_count is not none else "—" }}</dd></div>
+  <div><dt>Bytes</dt><dd>{{ job.bytes if job.bytes is not none else "—" }}</dd></div>
+  <div><dt>rsync exit</dt><dd>{{ job.rsync_exit if job.rsync_exit is not none else "—" }}</dd></div>
+</dl>
+
+{% if job.status == 'safe_to_remove' %}
+<p class="flash flash-ok">It is safe to remove the card.</p>
+{% elif job.status == 'unmount_failed' %}
+<p class="flash flash-error">Copied, but leave the card inserted until it unmounts.</p>
+{% elif job.status == 'held' %}
+<p class="flash flash-warn">Held for onboarding. <a href="/onboard?uuid={{ job.uuid }}">Onboard this card</a></p>
+{% elif job.status == 'failed' %}
+<p class="flash flash-error">{{ job.error }}</p>
+{% endif %}
+
+{% if job.error and job.status != 'failed' %}
+<p class="muted">{{ job.error }}</p>
+{% endif %}
+
+{% if summary %}
+<h2>Transfer summary</h2>
+<pre class="log">{{ summary }}</pre>
+{% endif %}
+{% endblock %}

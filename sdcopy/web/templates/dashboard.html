@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · sdcopy{% endblock %}
+{% block head %}
+<meta http-equiv="refresh" content="8">
+{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Landing zone</h1>
+  <p>Insert a known card and it copies on its own. New cards wait here until you name them.</p>
+</section>
+
+<section>
+  <h2>Inserted now</h2>
+  {% if devices %}
+  <table>
+    <thead>
+      <tr>
+        <th>Card</th>
+        <th>UUID</th>
+        <th>Size</th>
+        <th>Mount</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in devices %}
+      {% set facts = row.facts %}
+      {% set card = row.card %}
+      <tr>
+        <td>
+          {% if card %}
+            <strong>{{ card.nickname }}</strong>
+            {% if not card.enabled %}<span class="pill pill-warn">disabled</span>{% endif %}
+          {% else %}
+            <strong>{{ facts.label or facts.kernel }}</strong>
+            <span class="pill">not onboarded</span>
+          {% endif %}
+          <div class="muted">{{ facts.kernel }} · {{ facts.fstype or "unknown fs" }}</div>
+        </td>
+        <td class="mono">{{ facts.uuid or "—" }}</td>
+        <td>{{ facts.size or "—" }}</td>
+        <td class="mono">{{ facts.mountpoint or "not mounted" }}</td>
+        <td class="actions">
+          {% if not card %}
+            <a class="btn" href="/onboard?device={{ facts.kernel }}">Onboard</a>
+          {% else %}
+            <form method="post" action="/ingest/{{ facts.kernel }}">
+              <button type="submit">Copy now</button>
+            </form>
+            <form method="post" action="/ingest/{{ facts.kernel }}?dry_run=true">
+              <button type="submit" class="ghost">Dry run</button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No removable cards detected. Insert one, or onboard later from Cards if you already know the UUID.</p>
+  {% endif %}
+</section>
+
+<section>
+  <h2>Recent jobs</h2>
+  {% if jobs %}
+  <table>
+    <thead>
+      <tr>
+        <th>When</th>
+        <th>Status</th>
+        <th>Card</th>
+        <th>Destination / note</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for job in jobs %}
+      <tr>
+        <td class="muted">{{ job.started_at }}</td>
+        <td>
+          <span class="pill pill-{{ job.status }}">{{ job.status.replace('_', ' ') }}</span>
+        </td>
+        <td>{{ job.nickname or job.uuid or job.device }}</td>
+        <td>
+          <a href="/jobs/{{ job.id }}">{{ job.dest or job.error or job.id }}</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No jobs yet.</p>
+  {% endif %}
+</section>
+{% endblock %}
